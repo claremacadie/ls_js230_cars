@@ -1,0 +1,49 @@
+/* @import url("whitespace-reset.css"); */
+
+/* style.css */
+
+body {
+  background: beige;
+  color: black;
+  margin: 0;
+}
+
+header {
+  background: orange;
+  color: white;
+  margin: 0;
+  padding: 1em;
+}
+
+img {
+  width: 10em;
+}
+
+div.car-div {
+  display: inline-block;
+  padding: 1em;
+}
+
+button {
+  background: orange;
+  color: white;
+  border-color: white;
+  border-radius: 0.5em;
+  margin-left: 1em;
+  padding: 0.5em;
+  width: 4em;
+}
+
+label {
+  padding: 0.5em;
+}
+
+select {
+  background: orange;
+  border-color: white;
+  border-radius: 0.5em;
+  color: white;
+  margin-right: 1em;
+  padding: 0.25em;
+}
+
