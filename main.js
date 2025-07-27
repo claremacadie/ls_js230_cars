@@ -16,13 +16,6 @@ class Car {
     this.year = year;
     this.price = price;
 
-    this.$carDiv = document.createElement('div');
-    this.$img = document.createElement('img');
-    this.$makeAndModel = document.createElement('h2');
-    this.$price = document.createElement('p');
-    this.$year = document.createElement('p');
-    this.$button = document.createElement('button');
-
     this.init();
   }
 
@@ -39,6 +32,12 @@ class Car {
   }
 
   init() {
+    this.$carDiv = document.createElement('div');
+    this.$img = document.createElement('img');
+    this.$makeAndModel = document.createElement('h2');
+    this.$price = document.createElement('p');
+    this.$year = document.createElement('p');
+    this.$button = document.createElement('button');
     this.populateHTML();
   }
 }
@@ -48,11 +47,7 @@ class App {
     this.carsData = cars;
     this.allCarsObjs = cars.map(car => new Car(car));
     this.filteredCarsObjs = this.allCarsObjs;
-    this.filterData = this.createFilterData()
-
-    this.$carsDiv = document.createElement('div');
-    this.$filtersForm = document.createElement('form');
-    this.$filterButton = document.createElement('button');
+    this.filterData = this.createFilterData();
 
     this.init();
     this.bind();
@@ -77,7 +72,7 @@ class App {
 
   createAnyOptionBox(selectBox) {
     let optionBox = document.createElement('option');
-    optionBox.value = 'any';
+    optionBox.value = '';
     optionBox.textContent = 'Any';
     selectBox.append(optionBox);
   }
@@ -121,6 +116,10 @@ class App {
   }
   
   init() {
+    this.$carsDiv = document.createElement('div');
+    this.$filtersForm = document.createElement('form');
+    this.$filterButton = document.createElement('button');
+
     this.populateCarsDiv();
     this.createFilters();
   }
@@ -129,7 +128,7 @@ class App {
     let userSelection= {};
 
     Object.keys(this.filterData).forEach(filterName => {
-      if (this.$filtersForm[filterName].value !== 'any') {
+      if (this.$filtersForm[filterName].value !== '') {
         userSelection[filterName] = this.$filtersForm[filterName].value;
       }
     });
@@ -147,7 +146,7 @@ class App {
     return flag;
   }
 
-  updateFilteredCarsObjWithSelection() {
+  applyFilters() {
     this.filteredCarsObjs = this.allCarsObjs.filter(carObj => {
       return this.carObjIsSelected(carObj);
     });
@@ -157,7 +156,7 @@ class App {
     event.preventDefault();
     
     this.userSelection = this.getUserSelection();
-    this.updateFilteredCarsObjWithSelection();
+    this.applyFilters();
     this.populateCarsDiv();
   }
 
