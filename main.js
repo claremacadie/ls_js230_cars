@@ -31,6 +31,14 @@ class Car {
     this.$carDiv.append(this.$img, this.$makeAndModel, this.$year, this.$price, this.$button);
   }
 
+  isSelected(userSelection) {
+    return Object.keys(userSelection).every(filterName => {
+      let filterValue = userSelection[filterName];
+      let carValue = this[filterName];
+      return String(filterValue) == String(carValue);
+    });
+  }
+
   init() {
     this.$carDiv = document.createElement('div');
     this.$img = document.createElement('img');
@@ -42,15 +50,12 @@ class Car {
   }
 }
 
-class App {
-  constructor(cars) {
-    this.carsData = cars;
-    this.allCarsObjs = cars.map(car => new Car(car));
-    this.filteredCarsObjs = this.allCarsObjs;
+class FilterForm {
+  constructor(appObj) {
+    this.appObj = appObj;
     this.filterData = this.createFilterData();
 
     this.init();
-    this.bind();
   }
 
   createFilterData() {
@@ -60,7 +65,7 @@ class App {
     filters.forEach(filterName => {
       let possibleOptions = new Set();
 
-      this.carsData.forEach(obj => {
+      this.appObj.carsData.forEach(obj => {
         possibleOptions.add(obj[filterName]);
       });
 
@@ -70,13 +75,6 @@ class App {
     return data;
   }
 
-  createAnyOptionBox(selectBox) {
-    let optionBox = document.createElement('option');
-    optionBox.value = '';
-    optionBox.textContent = 'Any';
-    selectBox.append(optionBox);
-  }
-
   createOptionBox(optionName, selectBox) {
     let optionBox = document.createElement('option');
     optionBox.value = optionName;
@@ -84,90 +82,101 @@ class App {
     selectBox.append(optionBox);
   }
 
+  addOptions(selectBox, filterName) {
+    selectBox.innerHTML = '';
+    let options = this.filterData[filterName];
+
+    this.createOptionBox('Any', selectBox);
+    options.forEach(optionName => {
+      this.createOptionBox(optionName, selectBox);
+    });
+  }
+
   createSelectionBox(filterName) {
     let label = document.createElement('label');
     label.htmlFor = filterName;
     label.textContent = filterName[0].toUpperCase() + filterName.slice(1);
-    let options = this.filterData[filterName];
 
     let selectBox = document.createElement('select');
     selectBox.id = filterName;
     selectBox.name = filterName;
-    this.createAnyOptionBox(selectBox);
 
-    options.forEach(optionName => {
-      this.createOptionBox(optionName, selectBox);
-    });
+    this.addOptions(selectBox, filterName);
 
-    this.$filtersForm.append(label, selectBox);
+    this.$form.append(label, selectBox);
   }
-  
+
   createFilters() {
     Object.keys(this.filterData).forEach(this.createSelectionBox.bind(this));
 
     this.$filterButton.type = 'submit';
     this.$filterButton.textContent = 'Filter';
-    this.$filtersForm.append(this.$filterButton);
-  }
-
-  populateCarsDiv() {
-    this.$carsDiv.innerHTML = '';
-    this.filteredCarsObjs.forEach(carObj => this.$carsDiv.append(carObj.$carDiv));
-  }
-  
-  init() {
-    this.$carsDiv = document.createElement('div');
-    this.$filtersForm = document.createElement('form');
-    this.$filterButton = document.createElement('button');
-
-    this.populateCarsDiv();
-    this.createFilters();
+    this.$form.append(this.$filterButton);
   }
 
   getUserSelection() {
-    let userSelection= {};
+    let userSelection = {};
 
     Object.keys(this.filterData).forEach(filterName => {
-      if (this.$filtersForm[filterName].value !== '') {
-        userSelection[filterName] = this.$filtersForm[filterName].value;
+      if (this.$form[filterName].value !== 'Any') {
+        userSelection[filterName] = this.$form[filterName].value;
       }
     });
 
     return userSelection;
   }
 
-  carObjIsSelected(carObj) {
-    let flag = true;
-    Object.keys(this.userSelection).forEach(filterName => {
-      let filterValue = this.userSelection[filterName];
-      let carValue = carObj[filterName];
-      if (String(filterValue) !== String(carValue)) flag = false;
-    });
-    return flag;
+  init() {
+    this.$form = document.createElement('form');
+    this.$filterButton = document.createElement('button');
+
+    this.createFilters();
+  }
+}
+
+class App {
+  constructor(cars) {
+    this.carsData = cars;
+    this.allCarsObjs = cars.map(car => new Car(car));
+    this.filteredCarsObjs = this.allCarsObjs;
+    this.filterFormObj = new FilterForm(this);
+
+    this.init();
+    this.bind();
+  }
+
+  populateCarsDiv() {
+    this.$carsDiv.innerHTML = '';
+    this.filteredCarsObjs.forEach(carObj => this.$carsDiv.append(carObj.$carDiv));
   }
 
   applyFilters() {
     this.filteredCarsObjs = this.allCarsObjs.filter(carObj => {
-      return this.carObjIsSelected(carObj);
+      return carObj.isSelected(this.userSelection);
     });
   }
 
   handleFilterButtonClick(event) {
     event.preventDefault();
     
-    this.userSelection = this.getUserSelection();
+    this.userSelection = this.filterFormObj.getUserSelection();
     this.applyFilters();
+    this.populateCarsDiv();
+  }
+  
+  init() {
+    this.$carsDiv = document.createElement('div');
     this.populateCarsDiv();
   }
 
   bind() {
-    this.$filterButton.addEventListener('click', this.handleFilterButtonClick.bind(this));
+    this.filterFormObj.$filterButton.addEventListener('click', this.handleFilterButtonClick.bind(this));
   }
 }
 
 function main(cars) {
   const app = new App(cars);
-  document.querySelector('header').append(app.$filtersForm);
+  document.querySelector('header').append(app.filterFormObj.$form);
   document.querySelector('main').append(app.$carsDiv);
 }
 
