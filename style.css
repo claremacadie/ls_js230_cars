@@ -47,3 +47,6 @@ select {
   padding: 0.25em;
 }
 
+.hidden {
+  display: none;
+}
